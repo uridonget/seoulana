@@ -5,7 +5,24 @@ import "../styles/global.css";
 const HomePage = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("");
-  const [code, setCode] = useState("");  // <-- code로 변경
+  const [code, setCode] = useState("");
+
+  const connectPhantomWallet = async () => {
+    if (window.solana && window.solana.isPhantom) {
+      try {
+        const resp = await window.solana.connect();
+        console.log("👛 Phantom 지갑 연결 성공:", resp.publicKey.toString());
+        return true;
+      } catch (err) {
+        console.error("❌ Phantom 지갑 연결 실패:", err);
+        alert("지갑 연결을 허용해주세요.");
+        return false;
+      }
+    } else {
+      alert("Phantom 지갑이 설치되어 있지 않습니다.\nhttps://phantom.app에서 설치해 주세요.");
+      return false;
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,15 +32,18 @@ const HomePage = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name, code }),  // <-- name과 code 전송
+      body: JSON.stringify({ name, code }),
     });
 
     const result = await response.json();
-
     console.log(result);
 
-    if (result.message == '투표 가능') {
-      navigate("/vote");
+    if (result.message === "투표 가능") {
+      const walletConnected = await connectPhantomWallet();
+
+      if (walletConnected) {
+        navigate("/vote");
+      }
     } else {
       alert("인증 실패! 정보를 다시 확인해주세요.");
     }
@@ -44,7 +64,7 @@ const HomePage = () => {
         <input
           type="text"
           placeholder="4자리 인증코드를 입력하세요"
-          value={code}  // <-- code로 변경
+          value={code}
           onChange={(e) => setCode(e.target.value)}
           className="input"
           required
@@ -58,4 +78,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
