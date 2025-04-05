@@ -9,7 +9,7 @@ def check_vote_status(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            name = data.get('body')  # body에는 이름
+            name = data.get('name')  # body에는 이름
             code = data.get('code')
 
             info = Information.objects.get(name=name, code=code)
